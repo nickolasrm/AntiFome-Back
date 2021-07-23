@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "coverage": "jest --coverage",
-    "test": "jest"
+    "coverage": "jest --runInBand --coverage",
+    "test": "jest --runInBand"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",

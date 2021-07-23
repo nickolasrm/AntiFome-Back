@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 
 const users = require('../controllers/users')
 
-const SECRET = process.env.JWT_SECRET
+const SECRET = process.env.JWT_SECRET || 'MySuperSecretCode'
 const SECONDS_UNTIL_TOKEN_EXPIRATION = 43200 //30 days
 
 /**

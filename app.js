@@ -13,6 +13,7 @@ const port = 3000
 const indexRouter = require('./routes/index')
 const loginRouter = require('./routes/login')
 const registerRouter = require('./routes/register')
+const accountRouter = require('./routes/account')
 
 const app = express()
 
@@ -31,11 +32,13 @@ app.use(express.static(constants.PUBLIC_PATH))
 app.use(indexRouter)
 app.use(loginRouter)
 app.use(registerRouter)
+app.use(accountRouter)
 
 //Error handler
 errorHandler(app)
 
 module.exports = app.listen(port, () => {
-	console.log(`Listening on ${port}`)
+	if (process.env.ENV != 'test')
+		console.log(`Listening on ${port}`)
 })
 module.exports.db = db
