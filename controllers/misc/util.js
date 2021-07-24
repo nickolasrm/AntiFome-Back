@@ -2,6 +2,8 @@ const { cpf, cnpj } = require('cpf-cnpj-validator')
 const isValidCep = require('@brazilian-utils/is-valid-cep')
 const isValidPhone = require('@brazilian-utils/is-valid-phone')
 const {getStateCities, getAllStates, getAllCities} = require('easy-location-br')
+const { StatusCodes, ReasonPhrases } = require('http-status-codes')
+const passport = require('passport')
 
 /**
  * Returns only the numbers from a string
@@ -20,6 +22,22 @@ function extractNumbersAsString(strr) {
 function validText(text, min_length=1)
 {
 	return typeof text == 'string' && text.length >= min_length
+}
+
+/**
+ * Checks if a number is an integer and if is higher or qual to min and
+ * lesser or equal to max
+ * @param {Number} number 
+ * @param {Int} min 
+ * @param {Int} max 
+ * @returns 
+ */
+function validIntInRange(number, min, max)
+{
+	if (Number.isInteger(number))
+		return number >= min && number <= max
+	else
+		return false
 }
 
 /**
@@ -60,6 +78,15 @@ function validUsername(body) {
 	if (username && typeof username == 'string'
 		&& username.length >= 3) return true
 	else return false
+}
+
+/**
+ * Checks if a string is a valid cnpj
+ * @param {String} cnpj
+ */
+function validCNPJField(cnpjj)
+{
+	return cnpj.isValid(cnpjj)
 }
 
 /*
@@ -223,6 +250,39 @@ function hasAuthorization(req) {
 	return req.headers && req.headers.authorization
 }
 
+/**
+ * Calls passport authenticate for jwt and checks if it tried to authenticate.
+ * if true, calls a callback passing err, user and info
+ * @param {Request} req 
+ * @param {Response} res 
+ * @param {Middleware} next
+ * @param {Boolean} cnpjOnly
+ * @param {Boolean} isValid 
+ * @param {Function(err, user, info)} callback 
+ */
+async function jwtAuthenticatedResponse(req, res, next, cnpjOnly = false, isValid, callback)
+{
+	passport.authenticate('jwt', (err, user, info) => {
+		if (hasAuthorization(req))
+		{
+			if (user && (!cnpjOnly || validCNPJField(user.cpfCnpj)))
+			{
+				if (isValid)
+					callback(err, user, info)
+				else
+					res.status(StatusCodes.BAD_REQUEST)
+						.send(ReasonPhrases.BAD_REQUEST)
+			}
+			else
+				res.status(StatusCodes.UNAUTHORIZED)
+					.send(ReasonPhrases.UNAUTHORIZED)
+		}
+		else
+			res.status(StatusCodes.BAD_REQUEST)
+				.send(ReasonPhrases.BAD_REQUEST)
+	})(req, res, next)
+}
+
 module.exports = {
 	validEmail,
 	validPassword,
@@ -240,6 +300,9 @@ module.exports = {
 	parseNeighborhood,
 	validStreet,
 	parseStreet,
+	validText,
+	validIntInRange,
 	extractNumbersAsString,
-	hasAuthorization
+	hasAuthorization,
+	jwtAuthenticatedResponse
 }

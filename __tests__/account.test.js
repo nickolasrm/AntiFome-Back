@@ -3,7 +3,7 @@ process.env.ENV = 'test'
 const request = require('supertest')
 const { StatusCodes } = require('http-status-codes')
 const app = require('../app')
-const {generateTemplateUser} = require('./util')
+const {generateUser} = require('./util')
 
 describe('Account', () => {
 	beforeAll(async () => {
@@ -26,7 +26,7 @@ describe('Account', () => {
 	})
 
 	it('Right request', async () => {
-		const user = generateTemplateUser()
+		const user = generateUser()
 
 		let res = await request(app)
 			.post('/register')

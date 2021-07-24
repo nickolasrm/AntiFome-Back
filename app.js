@@ -14,6 +14,7 @@ const indexRouter = require('./routes/index')
 const loginRouter = require('./routes/login')
 const registerRouter = require('./routes/register')
 const accountRouter = require('./routes/account')
+const donationsRouter = require('./routes/donations')
 
 const app = express()
 
@@ -33,6 +34,7 @@ app.use(indexRouter)
 app.use(loginRouter)
 app.use(registerRouter)
 app.use(accountRouter)
+app.use(donationsRouter)
 
 //Error handler
 errorHandler(app)

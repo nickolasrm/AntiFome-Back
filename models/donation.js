@@ -21,7 +21,7 @@ class Donation extends Model
 				allowNull: false
 			},
             status: {
-                type: INTEGER,
+                type: DataTypes.INTEGER,
                 allowNull: false,
                 defaultValue: 0
             }

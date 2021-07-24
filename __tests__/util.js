@@ -12,7 +12,7 @@
  * @param {String} args.neighborhood
  * @returns {User}
  */
-function generateTemplateUser(args)
+function generateUser(args)
 {
 	if (!args)
 		args = {}
@@ -35,6 +35,19 @@ function generateTemplateUser(args)
 	return user
 }
 
+function generateDonation(args)
+{
+	if (!args)
+		args = {}
+		
+	return {
+		description: args.description || 'Carne vermelha',
+		quantity: args.quantity || 5,
+		priority: args.priority || 2
+	}
+}
+
 module.exports = {
-	generateTemplateUser
+	generateUser,
+	generateDonation
 }

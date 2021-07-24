@@ -3,7 +3,7 @@ process.env.ENV = 'test'
 const request = require('supertest')
 const { StatusCodes } = require('http-status-codes')
 const app = require('../app')
-const {generateTemplateUser} = require('./util')
+const {generateUser} = require('./util')
 
 describe('Registering', () => {
 	beforeAll(async () => {
@@ -36,7 +36,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser({email: '@'}))
+			.send(generateUser({email: '@'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -44,7 +44,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser({username: 'AB'}))
+			.send(generateUser({username: 'AB'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -52,7 +52,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser({password: '1234567'}))
+			.send(generateUser({password: '1234567'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -60,7 +60,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser({cpf: '11111111111'}))
+			.send(generateUser({cpf: '11111111111'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -68,7 +68,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser({cnpj: '53.03.919/0001-06'}))
+			.send(generateUser({cnpj: '53.03.919/0001-06'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -76,7 +76,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser({state: 'UU'}))
+			.send(generateUser({state: 'UU'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -84,7 +84,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser({state: 'RAIK'}))
+			.send(generateUser({state: 'RAIK'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -92,7 +92,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser({neighborhood: 'A'}))
+			.send(generateUser({neighborhood: 'A'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -100,7 +100,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser({street: 'A'}))
+			.send(generateUser({street: 'A'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -108,7 +108,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser({zip: '2188811'}))
+			.send(generateUser({zip: '2188811'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -116,7 +116,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser({phone: '21 99999 x999'}))
+			.send(generateUser({phone: '21 99999 x999'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -124,7 +124,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser({email: 'test1@test.com', cpf: '256.344.287-77'}))
+			.send(generateUser({email: 'test1@test.com', cpf: '256.344.287-77'}))
 		expect(res.status).toBe(StatusCodes.CREATED)
 	})
 
@@ -132,7 +132,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser())
+			.send(generateUser())
 		expect(res.status).toBe(StatusCodes.CREATED)
 	})
 
@@ -140,7 +140,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send(generateTemplateUser())
+			.send(generateUser())
 		expect(res.status).toBe(StatusCodes.CONFLICT)
 	})
 })

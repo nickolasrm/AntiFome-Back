@@ -1,7 +1,7 @@
 const{StatusCodes, ReasonPhrases} = require('http-status-codes')
 const {compareSync} = require('bcrypt')
 
-const {validEmail, validPassword} = require('./misc/util')
+const {validEmail, validPassword, jwtAuthenticatedResponse} = require('./misc/util')
 const users = require('./users')
 const passport = require('../config/passport')
 
@@ -12,7 +12,7 @@ module.exports = {
 	 * @param {Response} res 
 	 * @returns {Response}
 	 */
-	login: async (req, res) => {
+	login: async (req, res, next) => {
 		if (req.headers && req.headers.authorization)
 			return passport.authenticate('jwt', 
 				{
