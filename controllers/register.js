@@ -1,7 +1,9 @@
 const {StatusCodes, ReasonPhrases} = require('http-status-codes')
 const users = require('./users')
 const {validEmail, validUsername, validPassword, validCNPJ, 
-		validCPF, parseCPForCPF} = require('./misc/util')
+		validCPF, parseCPForCNPJ, validPhone, validZip, validCity,
+		validNeighborhood, validStreet, parseNeighborhood, parseStreet,
+		validState, parsePhone, parseZip} = require('./misc/util')
 
 module.exports = {
 	/**
@@ -12,7 +14,9 @@ module.exports = {
 	 */
 	register: async (req, res) => {
 		const body = req.body
-		if (validEmail(body) && validPassword(body) && validUsername(body))
+		if (validEmail(body) && validPassword(body) && validUsername(body)
+			&& validZip(body) && validPhone(body) && validState(body) // State verification should be before
+			&& validCity(body) && validNeighborhood(body) && validStreet(body))
 		{
 			let cpfCnpj = undefined
 			if (validCPF(body))
@@ -26,7 +30,10 @@ module.exports = {
 				if (await users.show(email) == null)
 				{
 					const user = users.store(body.username, email, 
-						body.password, parseCPForCPF(cpfCnpj))
+						body.password, parseCPForCNPJ(cpfCnpj), body.state, 
+						body.city, body.neighborhood, 
+						body.street, parseZip(body.zip),
+						parsePhone(body.phone))
 					if (user)
 						return res.status(StatusCodes.CREATED)
 							.send(ReasonPhrases.CREATED)

@@ -1,4 +1,5 @@
 const {Model, DataTypes} = require('sequelize')
+const Donation = require('./donation')
 
 class User extends Model
 {
@@ -29,6 +30,31 @@ class User extends Model
 				cpfCnpj: {
 					type: DataTypes.STRING(14),
 					allowNull: false
+				},
+                state: {
+                    type: DataTypes.CHAR(2),
+                    allowNull: false
+                },
+				// Definitely not the right way to store it, but time is running out
+                city: {
+                    type: DataTypes.STRING,
+                    allowNull: false
+                },
+                street: {
+                    type: DataTypes.STRING,
+                    allowNull: false
+                },
+                neighborhood: {
+                    type: DataTypes.STRING,
+                    allowNull: false
+                },
+                zip: {
+                    type: DataTypes.CHAR(8),
+                    allowNull: false
+                },
+				phone: {
+					type: DataTypes.STRING(12),
+					allowNull: false
 				}
 			}, 
 			{
@@ -36,6 +62,11 @@ class User extends Model
 				tableName: 'users',
 				timestamps: false
 			})
+	}
+
+	static associate()
+	{
+		this.hasMany(Donation, {foreignKey: 'id'})
 	}
 }
 

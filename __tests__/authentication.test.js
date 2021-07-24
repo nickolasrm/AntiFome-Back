@@ -3,6 +3,7 @@ process.env.ENV = 'test'
 const request = require('supertest')
 const { StatusCodes } = require('http-status-codes')
 const app = require('../app')
+const {generateTemplateUser} = require('./util')
 
 describe('Registering', () => {
 	beforeAll(async () => {
@@ -35,7 +36,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send({ username: 'Test', password: '12345678', email: '@' })
+			.send(generateTemplateUser({email: '@'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -43,10 +44,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send({
-				username: 'AB', password: '12345678', email: 'test@gmail.com',
-				cpf: '25634428777'
-			})
+			.send(generateTemplateUser({username: 'AB'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -54,10 +52,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send({
-				username: 'Test', password: '1234567', email: 'test@gmail.com',
-				cpf: '25634428777'
-			})
+			.send(generateTemplateUser({password: '1234567'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -65,10 +60,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send({
-				username: 'Test', password: '1234567', email: 'test@gmail.com',
-				cpf: '111.111.111'
-			})
+			.send(generateTemplateUser({cpf: '11111111111'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -76,10 +68,55 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send({
-				username: 'Test', password: '1234567', email: 'test@gmail.com',
-				cnpj: '58.03.919/0001-06'
-			})
+			.send(generateTemplateUser({cnpj: '53.03.919/0001-06'}))
+		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
+	})
+
+	it('Request with invalid state', async () => {
+		const res = await request(app)
+			.post('/register')
+			.set('Content-Type', 'application/json')
+			.send(generateTemplateUser({state: 'UU'}))
+		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
+	})
+
+	it('Request with invalid city', async () => {
+		const res = await request(app)
+			.post('/register')
+			.set('Content-Type', 'application/json')
+			.send(generateTemplateUser({state: 'RAIK'}))
+		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
+	})
+
+	it('Request with invalid neighborhood', async () => {
+		const res = await request(app)
+			.post('/register')
+			.set('Content-Type', 'application/json')
+			.send(generateTemplateUser({neighborhood: 'A'}))
+		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
+	})
+
+	it('Request with invalid street', async () => {
+		const res = await request(app)
+			.post('/register')
+			.set('Content-Type', 'application/json')
+			.send(generateTemplateUser({street: 'A'}))
+		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
+	})
+
+	it('Request with invalid zip', async () => {
+		const res = await request(app)
+			.post('/register')
+			.set('Content-Type', 'application/json')
+			.send(generateTemplateUser({zip: '2188811'}))
+		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
+	})
+
+	it('Request with invalid phone', async () => {
+		const res = await request(app)
+			.post('/register')
+			.set('Content-Type', 'application/json')
+			.send(generateTemplateUser({phone: '21 99999 x999'}))
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -87,12 +124,7 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send({
-				username: 'Test',
-				password: '12345678',
-				email: 'test@test.com',
-				cpf: '256.344.287-77'
-			})
+			.send(generateTemplateUser({email: 'test1@test.com', cpf: '256.344.287-77'}))
 		expect(res.status).toBe(StatusCodes.CREATED)
 	})
 
@@ -100,13 +132,16 @@ describe('Registering', () => {
 		const res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send({
-				username: 'Test',
-				password: '12345678',
-				email: 'test2@test.com',
-				cnpj: '58.403.919/0001-06'
-			})
+			.send(generateTemplateUser())
 		expect(res.status).toBe(StatusCodes.CREATED)
+	})
+
+	it('Request conflict', async () => {
+		const res = await request(app)
+			.post('/register')
+			.set('Content-Type', 'application/json')
+			.send(generateTemplateUser())
+		expect(res.status).toBe(StatusCodes.CONFLICT)
 	})
 })
 
@@ -138,9 +173,7 @@ describe('Login', () => {
 		const res = await request(app)
 			.post('/login')
 			.set('Content-Type', 'application/json')
-			.send({
-				password: '1234567', email: 'test@gmail.com'
-			})
+			.send({email: 'test@test.com', password: '1234567'})
 		expect(res.status).toBe(StatusCodes.BAD_REQUEST)
 	})
 
@@ -148,9 +181,7 @@ describe('Login', () => {
 		const res = await request(app)
 			.post('/login')
 			.set('Content-Type', 'application/json')
-			.send({
-				password: '12345678', email: 'test@gmail3.com'
-			})
+			.send({email: 'aaa@ggg', password: '12345678'})
 		expect(res.status).toBe(StatusCodes.NOT_FOUND)
 	})
 
@@ -158,9 +189,7 @@ describe('Login', () => {
 		const res = await request(app)
 			.post('/login')
 			.set('Content-Type', 'application/json')
-			.send({
-				password: '12345679', email: 'test@test.com'
-			})
+			.send({email: 'test@test.com', password: '12345679'})
 		expect(res.status).toBe(StatusCodes.UNAUTHORIZED)
 	})
 
@@ -168,9 +197,7 @@ describe('Login', () => {
 		const res = await request(app)
 			.post('/login')
 			.set('Content-Type', 'application/json')
-			.send({
-				password: '12345678', email: 'test@test.com'
-			})
+			.send({password: '12345678', email: 'test@test.com'})
 		expect(res.status).toBe(StatusCodes.OK)
 		expect(res.body.token).toBeDefined()
 	})

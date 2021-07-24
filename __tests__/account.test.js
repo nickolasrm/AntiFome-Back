@@ -3,6 +3,7 @@ process.env.ENV = 'test'
 const request = require('supertest')
 const { StatusCodes } = require('http-status-codes')
 const app = require('../app')
+const {generateTemplateUser} = require('./util')
 
 describe('Account', () => {
 	beforeAll(async () => {
@@ -25,35 +26,29 @@ describe('Account', () => {
 	})
 
 	it('Right request', async () => {
-		const email = 'test@test.com'
-		const password = '12345678'
-		const username = 'Test'
-		const cpf = '25634428777'
+		const user = generateTemplateUser()
 
 		let res = await request(app)
 			.post('/register')
 			.set('Content-Type', 'application/json')
-			.send({
-				username,
-				password,
-				cpf,
-				email
-			})
+			.send(user)
 
 		res = await request(app)
 			.post('/login')
 			.set('Content-Type', 'application/json')
-			.send({email, password})
+			.send({email: user.email, password: user.password})
 			
 		res = await request(app)
 			.get('/account')
 			.set('Content-Type', 'application/json')
 			.set('Authorization', res.body.token)
 			.send()
+
+		delete user['password']
 		expect(res.status).toBe(StatusCodes.OK)
-		expect(res.body.username).toBe(username)
-		expect(res.body.email).toBe(email)
-		expect(res.body.cpfCnpj).toBe(cpf)
+		expect(res.body.email).toBe(user.email)
+		expect(res.body.username).toBe(user.username)
+		expect(res.body.password).toBeUndefined()
 	})
 
 	afterAll(async () => {

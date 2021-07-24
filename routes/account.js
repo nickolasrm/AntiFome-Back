@@ -10,11 +10,10 @@ router.get('/account', (req, res, next) => {
 		if (req.headers && req.headers.authorization)
 		{
 			if (user)
-				return res.status(StatusCodes.OK).json({
-					username: user.username,
-					email: user.email,
-					cpfCnpj: user.cpfCnpj
-				})
+			{
+				const {password, ...rest} = JSON.parse(JSON.stringify(user))
+				return res.status(StatusCodes.OK).json(rest)
+			}
 			else
 				return res.status(StatusCodes.UNAUTHORIZED)
 					.send(ReasonPhrases.UNAUTHORIZED)

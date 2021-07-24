@@ -8,12 +8,30 @@ module.exports = {
 	 * @param {String[255]} username 
 	 * @param {String[255]} email 
 	 * @param {String} password 
+	 * @param {String{2}} state
+	 * @param {String{255}} city
+	 * @param {String{255}} neighborhood,
+	 * @param {String{255}} street,
+	 * @param {String{8}} zip,
+	 * @param {String{11}} phone
 	 * @returns {User}
 	 */
-	store: async (username, email, password, cpfCnpj) => {
+	store: async (username, email, password, cpfCnpj, state, 
+			city, neighborhood, street, zip, phone) => {
 		const salt = genSalt()
 		const encrypted = hashSync(password, constants.SALT_ROUNDS)
-		return await User.create({username, email, password: encrypted, cpfCnpj})
+		return await User.create({
+			username, 
+			email, 
+			password: encrypted, 
+			cpfCnpj,
+			state,
+			city,
+			neighborhood,
+			street,
+			zip,
+			phone
+		})
 	},
 
 	/**
