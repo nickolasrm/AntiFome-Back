@@ -4,11 +4,13 @@ const db = require('./db/sequelize')
 
 const express = require('express')
 const createError = require('http-errors')
+const http = require('http')
+const cors = require('cors')
 
 const errorHandler = require('./config/error_handler')
 const constants = require('./misc/constants')
 
-const port = 3000
+const port = 80 // <- http port
 
 const indexRouter = require('./routes/index')
 const loginRouter = require('./routes/login')
@@ -17,6 +19,9 @@ const accountRouter = require('./routes/account')
 const donationsRouter = require('./routes/donations')
 
 const app = express()
+
+//Enabling cors
+app.use(cors())
 
 //Default engine
 app.engine('html', require('ejs').renderFile)
@@ -36,11 +41,18 @@ app.use(registerRouter)
 app.use(accountRouter)
 app.use(donationsRouter)
 
+app.get('/conc', async (req, res) => {
+  console.log('got request');
+
+  await new Promise(resolve => setTimeout(resolve, 10000));
+
+  console.log('done');
+  res.send('Hello World!');
+});
+
 //Error handler
 errorHandler(app)
 
-module.exports = app.listen(port, () => {
-	if (process.env.ENV != 'test')
-		console.log(`Listening on ${port}`)
-})
+//Http server
+module.exports = http.createServer(app).listen(port)
 module.exports.db = db

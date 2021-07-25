@@ -1,5 +1,6 @@
 const {Model, DataTypes} = require('sequelize')
 const User = require('./user')
+const Content = require('./content')
 
 class Donation extends Model
 {
@@ -18,23 +19,22 @@ class Donation extends Model
             },
 			user: {
 				type: DataTypes.INTEGER,
-				allowNull: false
+				allowNull: false,
+                references: {model: 'users', key: 'id'},
+                onUpdate: 'CASCADE',
+                onDelete: 'CASCADE'
 			},
-            status: {
-                type: DataTypes.INTEGER,
+            donationFinished: {
+                type: DataTypes.BOOLEAN,
                 allowNull: false,
-                defaultValue: 0
+                defaultValue: false
             }
 		}, {
 			sequelize,
 			timestamps: false,
-			tableName: 'donations'
+			tableName: 'donations',
+			indexes: [{fields: ['donationFinished', 'user']}]
 		})
-	}
-
-	static associate()
-	{
-		this.belongsTo(User, {foreignKey: 'id'})
 	}
 }
 

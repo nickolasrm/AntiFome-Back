@@ -25,9 +25,9 @@ function validText(text, min_length=1)
 }
 
 /**
- * Checks if a number is an integer and if is higher or qual to min and
+ * Checks if a something is an integer and if is higher or qual to min and
  * lesser or equal to max
- * @param {Number} number 
+ * @param {Any} number 
  * @param {Int} min 
  * @param {Int} max 
  * @returns 
@@ -38,6 +38,26 @@ function validIntInRange(number, min, max)
 		return number >= min && number <= max
 	else
 		return false
+}
+
+/**
+ * Checks if something is an integer
+ * @param {Any} number 
+ * @returns {Boolean}
+ */
+function validInt(number)
+{
+	return Number.isInteger(number)
+}
+
+/**
+ * Checks if something is a positive integer
+ * @param {Any} number 
+ * @returns {Boolean}
+ */
+function validPositiveInt(number)
+{
+	return Number.isInteger(number) && number > 0
 }
 
 /**
@@ -302,6 +322,8 @@ module.exports = {
 	parseStreet,
 	validText,
 	validIntInRange,
+	validInt,
+	validPositiveInt,
 	extractNumbersAsString,
 	hasAuthorization,
 	jwtAuthenticatedResponse

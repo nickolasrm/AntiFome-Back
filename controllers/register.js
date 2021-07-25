@@ -18,11 +18,15 @@ module.exports = {
 			&& validZip(body) && validPhone(body) && validState(body) // State verification should be before
 			&& validCity(body) && validNeighborhood(body) && validStreet(body))
 		{
+			let isCnpj = false
 			let cpfCnpj = undefined
 			if (validCPF(body))
 				cpfCnpj = body.cpf
 			else if(validCNPJ(body))
+			{
 				cpfCnpj = body.cnpj
+				isCnpj = true
+			}
 
 			if (cpfCnpj)
 			{
@@ -30,8 +34,8 @@ module.exports = {
 				if (await users.show(email) == null)
 				{
 					const user = users.store(body.username, email, 
-						body.password, parseCPForCNPJ(cpfCnpj), body.state, 
-						body.city, body.neighborhood, 
+						body.password, parseCPForCNPJ(cpfCnpj), isCnpj, 
+						body.state, body.city, body.neighborhood, 
 						body.street, parseZip(body.zip),
 						parsePhone(body.phone))
 					if (user)

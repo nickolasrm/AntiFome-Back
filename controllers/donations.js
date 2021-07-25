@@ -23,8 +23,7 @@ module.exports = {
 				const donation = Donation.create({
 					user: user.id,
 					description: body.description,
-					quantity: body.quantity,
-					status: constants.WAITING_DONATOR
+					quantity: body.quantity
 				})
 				if (donation)
 					res.status(StatusCodes.CREATED)
@@ -74,14 +73,27 @@ module.exports = {
 			})
 	},
 
+	/**
+	 * Returns all unfinished donation donations
+	 * @param {Int} user 
+	 * @returns {Donation[]}
+	 */
+	index_unfinished_donations: async (user) => {
+		return await Donation.findAll({where: {user, donationFinished: false}})
+	},
+
+	/**
+	 * Returns all donations available donations
+	 * @param {Request} req 
+	 * @param {Response} res 
+	 * @param {Middleware} next 
+	 * @returns {Donation[]}
+	 */
 	index_waiting_donator: async (req, res, next) => {
 		const body = req.body
 		if (Number.isInteger(body.user))
 		{
-			const donations = await Donation.findAll({where: {
-				user: body.user,
-				status: constants.WAITING_DONATOR
-			}})
+			const donations = await this.index_unfinished_donations(body.user)
 			return res.status(StatusCodes.OK)
 				.json(donations)
 		}
@@ -90,6 +102,12 @@ module.exports = {
 				.send(ReasonPhrases.BAD_REQUEST)
 	},
 
+	/**
+	 * Deletes a donation if the user is the owner
+	 * @param {Request} req 
+	 * @param {Response} res 
+	 * @param {Next} next 
+	 */
 	delete: async (req, res, next) => {
 		const body = req.body
 		await jwtAuthenticatedResponse(req, res, next, true, Number.isInteger(body.id), 

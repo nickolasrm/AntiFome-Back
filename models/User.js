@@ -1,5 +1,6 @@
 const {Model, DataTypes} = require('sequelize')
 const Donation = require('./donation')
+const Package = require('./package')
 
 class User extends Model
 {
@@ -10,7 +11,7 @@ class User extends Model
 					type: DataTypes.INTEGER,
 					primaryKey: true,
 					allowNull: false,
-					autoIncrement: true
+					autoIncrement: true,
 				},
 				username: {
 					type: DataTypes.STRING,
@@ -30,6 +31,11 @@ class User extends Model
 				cpfCnpj: {
 					type: DataTypes.STRING(14),
 					allowNull: false
+				},
+				isCnpj: {
+					type: DataTypes.BOOLEAN,
+					allowNull: false,
+					defaultValue: false
 				},
                 state: {
                     type: DataTypes.CHAR(2),
@@ -60,13 +66,9 @@ class User extends Model
 			{
 				sequelize,
 				tableName: 'users',
-				timestamps: false
+				timestamps: false,
+				indexes: [{fields: ['email']}, {fields: ['state', 'city']}]
 			})
-	}
-
-	static associate()
-	{
-		this.hasMany(Donation, {foreignKey: 'id'})
 	}
 }
 

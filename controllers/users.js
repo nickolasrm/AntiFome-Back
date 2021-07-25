@@ -16,7 +16,7 @@ module.exports = {
 	 * @param {String{11}} phone
 	 * @returns {User}
 	 */
-	store: async (username, email, password, cpfCnpj, state, 
+	store: async (username, email, password, cpfCnpj, isCnpj, state, 
 			city, neighborhood, street, zip, phone) => {
 		const salt = genSalt()
 		const encrypted = hashSync(password, constants.SALT_ROUNDS)
@@ -25,6 +25,7 @@ module.exports = {
 			email, 
 			password: encrypted, 
 			cpfCnpj,
+			isCnpj,
 			state,
 			city,
 			neighborhood,

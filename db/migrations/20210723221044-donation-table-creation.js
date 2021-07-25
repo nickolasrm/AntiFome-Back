@@ -30,13 +30,13 @@ module.exports = {
                 allowNull: false,
                 defaultValue: 5
             },
-            status: {
-                type: INTEGER,
+            donationFinished: {
+                type: DataTypes.BOOLEAN,
                 allowNull: false,
-                defaultValue: 0
+                defaultValue: false
             }
         })
-        await queryInterface.addIndex('donations', ['status', 'user'])
+        await queryInterface.addIndex('donations', ['donationFinished', 'user'])
     },
 
     down: async (queryInterface, Sequelize) => {

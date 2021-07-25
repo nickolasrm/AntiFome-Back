@@ -29,6 +29,11 @@ module.exports = {
                     type: DataTypes.STRING(14),
                     allowNull: false
                 },
+                isCnpj: {
+                    type: DataTypes.BOOLEAN,
+                    allowNull: false,
+                    defaultValue: false
+                },
                 state: {
                     type: DataTypes.CHAR(2),
                     allowNull: false
@@ -56,7 +61,7 @@ module.exports = {
             })
         //Adding index to improve performance
         await queryInterface.addIndex('users', ['email'])
-        await queryInterface.addIndex('users', ['state', 'city', 'neighborhood'])
+        await queryInterface.addIndex('users', ['state', 'city'])
     },
 
     down: async (queryInterface, Sequelize) => {

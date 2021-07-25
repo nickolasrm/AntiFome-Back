@@ -11,6 +11,7 @@
     "@brazilian-utils/is-valid-cep": "^0.1.2",
     "@brazilian-utils/is-valid-phone": "^0.1.1",
     "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
     "cpf-cnpj-validator": "^1.0.3",
     "dotenv": "^10.0.0",
     "easy-location-br": "^1.0.9",
