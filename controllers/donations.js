@@ -4,15 +4,6 @@ const {validText, validIntInRange, jwtAuthenticatedResponse, validPositiveInt} =
 const {StatusCodes, ReasonPhrases} = require('http-status-codes')
 const constants = require('../misc/constants')
 
-/**
- * Returns all unfinished donation donations
- * @param {Int} user 
- * @returns {Donation[]}
- */
-async function index_unfinished_donations(user){
-	return await Donation.findAll({where: {user, donationFinished: false}})
-}
-
 module.exports = {
 	/**
 	 * Stores a donation into the donations table if the request is valid
@@ -43,32 +34,6 @@ module.exports = {
 			})
 	},
 
-	/**
-	 * Returns a donation if the person who requested is the owner of it
-	 * @param {Request} req 
-	 * @param {Response} res 
-	 * @param {Middleware} next 
-	 */
-	show: async (req, res, next) => {
-		const query = req.query
-		const id = parseInt(query.id)
-		await jwtAuthenticatedResponse(req, res, next, true, validPositiveInt(id), 
-			async (err, user, info) => {
-				const donation = await Donation.findOne({where: {id: id}})
-				if (donation)
-				{
-					if (donation.user == user.id)
-						res.status(StatusCodes.OK)
-							.json(donation)
-					else
-						res.status(StatusCodes.UNAUTHORIZED)
-							.send(ReasonPhrases.UNAUTHORIZED)
-				}
-				else
-					res.status(StatusCodes.NOT_FOUND)
-						.send(ReasonPhrases.NOT_FOUND)
-			})
-	},
 
 	/**
 	 * Returns all data relative to an user, only if it is a CNPJ
@@ -83,8 +48,6 @@ module.exports = {
 			})
 	},
 
-	index_unfinished_donations,
-
 	/**
 	 * Returns all donations available donations
 	 * @param {Request} req 
@@ -97,7 +60,8 @@ module.exports = {
 		const id = parseInt(query.id)
 		if (validPositiveInt(id))
 		{
-			const donations = await index_unfinished_donations(id)
+			const donations = await Donation.findAll(
+				{where: {user: id, donationFinished: false}})
 			return res.status(StatusCodes.OK)
 				.json(donations)
 		}
