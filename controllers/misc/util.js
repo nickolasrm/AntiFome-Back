@@ -285,7 +285,7 @@ async function jwtAuthenticatedResponse(req, res, next, cnpjOnly = false, isVali
 	passport.authenticate('jwt', (err, user, info) => {
 		if (hasAuthorization(req))
 		{
-			if (user && (!cnpjOnly || validCNPJField(user.cpfCnpj)))
+			if (user && (!cnpjOnly || user.isCnpj))
 			{
 				if (isValid)
 					callback(err, user, info)

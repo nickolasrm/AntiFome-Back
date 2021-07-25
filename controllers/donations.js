@@ -4,6 +4,15 @@ const {validText, validIntInRange, jwtAuthenticatedResponse} = require('./misc/u
 const {StatusCodes, ReasonPhrases} = require('http-status-codes')
 const constants = require('../misc/constants')
 
+/**
+ * Returns all unfinished donation donations
+ * @param {Int} user 
+ * @returns {Donation[]}
+ */
+async function index_unfinished_donations(user){
+	return await Donation.findAll({where: {user, donationFinished: false}})
+}
+
 module.exports = {
 	/**
 	 * Stores a donation into the donations table if the request is valid
@@ -73,14 +82,7 @@ module.exports = {
 			})
 	},
 
-	/**
-	 * Returns all unfinished donation donations
-	 * @param {Int} user 
-	 * @returns {Donation[]}
-	 */
-	index_unfinished_donations: async (user) => {
-		return await Donation.findAll({where: {user, donationFinished: false}})
-	},
+	index_unfinished_donations,
 
 	/**
 	 * Returns all donations available donations
@@ -93,7 +95,7 @@ module.exports = {
 		const body = req.body
 		if (Number.isInteger(body.user))
 		{
-			const donations = await this.index_unfinished_donations(body.user)
+			const donations = await index_unfinished_donations(body.user)
 			return res.status(StatusCodes.OK)
 				.json(donations)
 		}

@@ -17,6 +17,7 @@ const loginRouter = require('./routes/login')
 const registerRouter = require('./routes/register')
 const accountRouter = require('./routes/account')
 const donationsRouter = require('./routes/donations')
+const packagesRouter = require('./routes/packages')
 
 const app = express()
 
@@ -40,6 +41,7 @@ app.use(loginRouter)
 app.use(registerRouter)
 app.use(accountRouter)
 app.use(donationsRouter)
+app.use(packagesRouter)
 
 app.get('/conc', async (req, res) => {
   console.log('got request');

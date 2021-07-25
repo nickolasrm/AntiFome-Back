@@ -37,7 +37,13 @@ class Content extends Model
 			tableName: 'contents',
             indexes: [{fields: ['package']}]
 		})
+        return Content
 	}
+
+    static associate(models)
+    {
+        Content.belongsTo(models.Donation, {foreignKey: 'id', targetKey: 'donation'})
+    }
 }
 
 module.exports = Content

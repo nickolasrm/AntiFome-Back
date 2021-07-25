@@ -6,7 +6,11 @@ const {StatusCodes, ReasonPhrases} = require('http-status-codes')
 const constants = require('../misc/constants')
 const User = require('../models/user')
 const Package = require('../models/package')
+const Content = require('../models/content')
 const contents = require('./contents')
+const { package_contents, delete_content } = require('./contents')
+const Donation = require('../models/donation')
+const sequelize = require('../db/sequelize')
 
 module.exports = {
 	/**
@@ -21,9 +25,9 @@ module.exports = {
 		// WARNING, INSTITUTION NOT VERIFIED
 		await jwtAuthenticatedResponse(req, res, next, false, 
 				validPositiveInt(institution_id)
-				, (user, err, info) => {
-			const institution = await User.findByPk(institution_id)
-			if (institution && validCNPJ(institution.cpfCnpj))
+				, async (err, user, info) => {
+			const institution = await User.findOne({where: {id: institution_id}})
+			if (institution && institution.isCnpj)
 			{
 				//Array with added contents
 				let addedContent = []
@@ -36,12 +40,12 @@ module.exports = {
 				})
 
 				//For each content
-				body.donations.forEach(el => {
+				for(var el of body.content){
 					const content = await contents.store(institution_id, pkg.id, 
 						el.id, el.quantity)
 					if (content instanceof Content)
 						addedContent.push(content)
-				})
+				}
 
 				if(addedContent.length)
 					return res.status(StatusCodes.CREATED)
@@ -68,7 +72,7 @@ module.exports = {
 	index: async (req, res, next) => {
 		await jwtAuthenticatedResponse(req, res, next, false, true, async (err, user, info) => {
 				res.status(StatusCodes.OK)
-					.json(await Package.findAll({user: user.id}))
+					.json(await Package.findAll({where: {user: user.id}}))
 			})
 	},
 
@@ -99,11 +103,24 @@ module.exports = {
 			const pkg = await Package.findByPk(body.id)
 			if (pkg)
 			{
-				if (pkg.user == user.id)
+				if (pkg.user == user.id && !pkg.finished)
 				{
-					pkg.destroy()
-					res.status(StatusCodes.OK)
-						.send(ReasonPhrases.OK)
+					const sum = await Content.findAll({
+						where: {package: pkg.id},
+						attributes: [[sequelize.fn('sum', sequelize.col('quantity')), 'total'], 
+									'donation'],
+						group: ['donation']
+					})
+					for(let group of sum)
+						await Donation.increment({quantity: parseInt(group.dataValues.total)}, 
+							{where: {id: group.dataValues.donation}})
+
+					if (await pkg.destroy())
+						res.status(StatusCodes.OK)
+							.send(ReasonPhrases.OK)
+					else
+						res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+							.send(ReasonPhrases.INTERNAL_SERVER_ERROR)
 				}
 				else
 					res.status(StatusCodes.UNAUTHORIZED)

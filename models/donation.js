@@ -24,6 +24,10 @@ class Donation extends Model
                 onUpdate: 'CASCADE',
                 onDelete: 'CASCADE'
 			},
+            quantity: {
+                type: DataTypes.INTEGER,
+                allowNull: false
+            },
             donationFinished: {
                 type: DataTypes.BOOLEAN,
                 allowNull: false,
@@ -35,7 +39,14 @@ class Donation extends Model
 			tableName: 'donations',
 			indexes: [{fields: ['donationFinished', 'user']}]
 		})
+        return Donation
 	}
+
+    static associate(models)
+    {
+        Donation.hasMany(models.Content, {foreignKey: 'id', sourceKey: 'donation'})
+    }
 }
+
 
 module.exports = Donation
