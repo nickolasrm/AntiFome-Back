@@ -18,16 +18,16 @@ module.exports = {
 	 * @param {Middleware} next 
 	 */
 	index: async (req, res, next) => {
-		const body = req.body
-		if(validState(body))
+		const query = req.query
+		if(validState(query))
 		{
 			let insts
-			if (validCity(body))
+			if (validCity(query))
 				insts = await sequelize.query(STATE_SELECT_QUERY + ' AND users.city = $$2',
-					{bind: [body.state, body.city], type: QueryTypes.SELECT})
+					{bind: [query.state, query.city], type: QueryTypes.SELECT})
 			else
 				insts = await sequelize.query(STATE_SELECT_QUERY,
-					{bind: [body.state], type: QueryTypes.SELECT})
+					{bind: [query.state], type: QueryTypes.SELECT})
 
 			res.status(StatusCodes.OK)
 				.json(insts)

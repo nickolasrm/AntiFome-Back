@@ -9,31 +9,33 @@ const Package = require('../models/package')
 module.exports = {
 	/**
 	 * Stores a content of a package if has valid donation and quantity
-	 * WARNING! This method assumes institution is a valid id
-	 * @param {Int} pkg package id
-	 * @param {Int} donation donation id
+	 * WARNING! This method assumes the package is a valid id
+	 * @param {Int} package package id
+	 * @param {Int} dpkg delivery package id
+	 * @param {Int} content content id
 	 * @param {Int} quantity 
 	 * @returns 
 	 */
-	store: async (institution, pkg, donation, quantity) => {
-		if (validPositiveInt(quantity) && validPositiveInt(donation)) {
+	store: async (package, dpkg, content, quantity) => {
+		if (validPositiveInt(quantity) && validPositiveInt(content)) {
 			try {
 				return sequelize.transaction(async (t) => {
-					return Donation.findOne({ where: { id: donation } },
-						{transaction: t}).then(async (don) => {
-							if (don) {
-								if (don.user == institution) {
+					return Content.findOne({ where: { id: content } },
+						{transaction: t}).then(async (cont) => {
+							if (cont) {
+								if (cont.package == package) {
 									// Cannot be lesser than 0
-									quantity = Math.min(don.quantity, quantity)
+									quantity = Math.min(cont.quantity, quantity)
 									// Updates donation
-									don.quantity = Math.max(don.quantity - quantity, 0)
+									cont.quantity = Math.max(cont.quantity - quantity, 0)
 									if (quantity)
 									{
-										if(!don.quantity)
-											don.donationFinished = true
-										await don.save()
+										if(!cont.quantity)
+											cont.finished = true
+										await cont.save()
 
-										return Content.create({ package: pkg, donation, quantity },
+										return DeliveryContent.create(
+											{ package: dpkg, donation: content, quantity },
 											{transaction: t})
 									}
 									else
@@ -55,21 +57,23 @@ module.exports = {
 	},
 
 	index_by_package: async (req, res, next) => {
-		const query = req.query
-		const pkg_id = parseInt(query.package)
 		await jwtAuthenticatedResponse(req, res, next, false, 
-				validPositiveInt(pkg_id),
+				validPositiveInt(req.body.package),
 			async (err, user, info) => {
-				const pkg = await Package.findByPk(pkg_id)
+				const pkg = await DeliveryPackage.findByPk(req.body.package)
 				if (pkg)
 				{
 					if(pkg.user == user.id)
 					{
+						//unverified
 						const resp = await sequelize.query(
-							"SELECT contents.id, donations.description, contents.quantity FROM contents \
-								INNER JOIN donations ON contents.donation = donations.id \
+							"SELECT delivery_contents.id, \
+									donations.description, \
+									delivery_contents.quantity FROM contents \
+								INNER JOIN contents ON contents.id = delivery_contents.id \
+								INNER JOIN delivery ON contents.donation = donation.id \
 								WHERE contents.package = $1",
-							{bind: [pkg_id], type: QueryTypes.SELECT})
+							{bind: [req.body.package], type: QueryTypes.SELECT})
 						res.status(StatusCodes.OK)
 							.json(await resp)
 					}
@@ -84,21 +88,23 @@ module.exports = {
 	},
 
 	index_by_package_institution: async (req, res, next) => {
-		const query = req.query
-		const pkg_id = parseInt(query.package)
 		await jwtAuthenticatedResponse(req, res, next, true, 
-				validPositiveInt(pkg_id),
+				validPositiveInt(req.body.package),
 			async (err, user, info) => {
-				const pkg = await Package.findByPk(pkg_id)
-				if (pkg)
+				const dpkg = await DeliveryPackage.findByPk(req.body.package)
+				if (dpkg)
 				{
-					if(pkg.institution == user.id)
+					const pkg = await Package.findByPk(dpkg.package)
+					if(pkg.user == user.id)
 					{
 						const resp = await sequelize.query(
-							"SELECT contents.id, donations.description, contents.quantity FROM contents \
-								INNER JOIN donations ON contents.donation = donations.id \
+							"SELECT delivery_contents.id, \
+									donations.description, \
+									delivery_contents.quantity FROM contents \
+								INNER JOIN contents ON contents.id = delivery_contents.id \
+								INNER JOIN delivery ON contents.donation = donation.id \
 								WHERE contents.package = $1",
-							{bind: [pkg_id], type: QueryTypes.SELECT})
+							{bind: [req.body.package], type: QueryTypes.SELECT})
 						res.status(StatusCodes.OK)
 							.json(await resp)
 					}

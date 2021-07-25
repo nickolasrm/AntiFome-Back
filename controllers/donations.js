@@ -1,6 +1,6 @@
 const Donation = require('../models/donation')
 const passport = require('../config/passport')
-const {validText, validIntInRange, jwtAuthenticatedResponse} = require('./misc/util')
+const {validText, validIntInRange, jwtAuthenticatedResponse, validPositiveInt} = require('./misc/util')
 const {StatusCodes, ReasonPhrases} = require('http-status-codes')
 const constants = require('../misc/constants')
 
@@ -50,10 +50,11 @@ module.exports = {
 	 * @param {Middleware} next 
 	 */
 	show: async (req, res, next) => {
-		const body = req.body
-		await jwtAuthenticatedResponse(req, res, next, true, Number.isInteger(body.id), 
+		const query = req.query
+		const id = parseInt(query.id)
+		await jwtAuthenticatedResponse(req, res, next, true, validPositiveInt(id), 
 			async (err, user, info) => {
-				const donation = await Donation.findOne({where: {id: body.id}})
+				const donation = await Donation.findOne({where: {id: id}})
 				if (donation)
 				{
 					if (donation.user == user.id)
@@ -92,10 +93,11 @@ module.exports = {
 	 * @returns {Donation[]}
 	 */
 	index_waiting_donator: async (req, res, next) => {
-		const body = req.body
-		if (Number.isInteger(body.user))
+		const query = req.query
+		const id = parseInt(query.id)
+		if (validPositiveInt(id))
 		{
-			const donations = await index_unfinished_donations(body.user)
+			const donations = await index_unfinished_donations(id)
 			return res.status(StatusCodes.OK)
 				.json(donations)
 		}

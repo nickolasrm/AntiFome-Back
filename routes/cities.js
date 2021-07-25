@@ -8,7 +8,7 @@ Object.assign(citiesArrs, cities)
 Object.keys(cities).forEach(el => { citiesArrs[el] = Array.from(cities[el]) })
 
 router.get('/cities', (req, res) => {
-	const state = req.body.state
+	const state = req.query.state
 	if (states.has(state))
 		return res.status(StatusCodes.OK)
 			.json(citiesArrs[state])
