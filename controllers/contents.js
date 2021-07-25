@@ -66,7 +66,8 @@ module.exports = {
 					if(pkg.user == user.id)
 					{
 						const resp = await sequelize.query(
-							"SELECT contents.id, donations.description, contents.quantity FROM contents \
+							"SELECT contents.id, donations.description, contents.quantity \
+								FROM contents \
 								INNER JOIN donations ON contents.donation = donations.id \
 								WHERE contents.package = $1",
 							{bind: [pkg_id], type: QueryTypes.SELECT})

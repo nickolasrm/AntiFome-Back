@@ -4,7 +4,6 @@ const {jwtAuthenticatedResponse,
 const {StatusCodes, ReasonPhrases} = require('http-status-codes')
 const Package = require('../models/package')
 const Content = require('../models/content')
-const Donation = require('../models/donation')
 const sequelize = require('../db/sequelize')
 const DeliveryPackage = require('../models/delivery_package')
 const DeliveryContent = require('../models/delivery_content')
