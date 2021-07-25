@@ -326,5 +326,7 @@ module.exports = {
 	validPositiveInt,
 	extractNumbersAsString,
 	hasAuthorization,
-	jwtAuthenticatedResponse
+	jwtAuthenticatedResponse,
+	states,
+	cities
 }

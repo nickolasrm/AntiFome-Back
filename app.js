@@ -18,6 +18,7 @@ const registerRouter = require('./routes/register')
 const accountRouter = require('./routes/account')
 const donationsRouter = require('./routes/donations')
 const packagesRouter = require('./routes/packages')
+const citiesRouter = require('./routes/cities')
 
 const app = express()
 
@@ -42,15 +43,7 @@ app.use(registerRouter)
 app.use(accountRouter)
 app.use(donationsRouter)
 app.use(packagesRouter)
-
-app.get('/conc', async (req, res) => {
-  console.log('got request');
-
-  await new Promise(resolve => setTimeout(resolve, 10000));
-
-  console.log('done');
-  res.send('Hello World!');
-});
+app.use(citiesRouter)
 
 //Error handler
 errorHandler(app)
