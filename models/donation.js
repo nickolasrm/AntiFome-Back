@@ -28,16 +28,17 @@ class Donation extends Model
                 type: DataTypes.INTEGER,
                 allowNull: false
             },
-            donationFinished: {
+            finished: {
                 type: DataTypes.BOOLEAN,
                 allowNull: false,
                 defaultValue: false
-            }
+            },
 		}, {
 			sequelize,
 			timestamps: false,
 			tableName: 'donations',
-			indexes: [{fields: ['donationFinished', 'user']}]
+			indexes: [{fields: ['finished', 'user']}],
+            paranoid: true
 		})
         return Donation
 	}

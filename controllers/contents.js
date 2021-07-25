@@ -3,13 +3,14 @@ const Content = require('../models/content')
 const Donation = require('../models/donation')
 const { validPositiveInt, jwtAuthenticatedResponse } = require('./misc/util')
 const sequelize = require('../db/sequelize')
-const {QueryTypes} = require('sequelize')
+const {QueryTypes, literal} = require('sequelize')
 const Package = require('../models/package')
 
 module.exports = {
 	/**
 	 * Stores a content of a package if has valid donation and quantity
 	 * WARNING! This method assumes institution is a valid id
+	 * @param {Int} institution institution id
 	 * @param {Int} pkg package id
 	 * @param {Int} donation donation id
 	 * @param {Int} quantity 
@@ -19,7 +20,7 @@ module.exports = {
 		if (validPositiveInt(quantity) && validPositiveInt(donation)) {
 			try {
 				return sequelize.transaction(async (t) => {
-					return Donation.findOne({ where: { id: donation } },
+					return Donation.findOne({ where: { id: donation }, paranoid: false },
 						{transaction: t}).then(async (don) => {
 							if (don) {
 								if (don.user == institution) {
@@ -30,8 +31,8 @@ module.exports = {
 									if (quantity)
 									{
 										if(!don.quantity)
-											don.donationFinished = true
-										await don.save()
+											don.finished = true
+										await don.save({paranoid: false})
 
 										return Content.create({ package: pkg, donation, quantity },
 											{transaction: t})
@@ -54,9 +55,16 @@ module.exports = {
 			return StatusCodes.BAD_REQUEST
 	},
 
+	/**
+	 * Gets all package contents by a given package into a query if
+	 * the package owner is the user of the token
+	 * @param {Request} req 
+	 * @param {Response} res 
+	 * @param {Middleware} next 
+	 */
 	index_by_package: async (req, res, next) => {
 		const query = req.query
-		const pkg_id = parseInt(query.package)
+		const pkg_id = parseInt(query.id)
 		await jwtAuthenticatedResponse(req, res, next, false, 
 				validPositiveInt(pkg_id),
 			async (err, user, info) => {
@@ -84,9 +92,16 @@ module.exports = {
 			})
 	},
 
+	/**
+	 * Gets all contents relative to package the institution package if
+	 * the token is the institution token
+	 * @param {Request} req 
+	 * @param {Response} res 
+	 * @param {Middleware} next 
+	 */
 	index_by_package_institution: async (req, res, next) => {
 		const query = req.query
-		const pkg_id = parseInt(query.package)
+		const pkg_id = parseInt(query.id)
 		await jwtAuthenticatedResponse(req, res, next, true, 
 				validPositiveInt(pkg_id),
 			async (err, user, info) => {
@@ -113,18 +128,31 @@ module.exports = {
 			})
 	},
 
+	/**
+	 * Deletes a package if the package belongs to the token user
+	 * @param {Request} req 
+	 * @param {Response} res 
+	 * @param {Middleware} next 
+	 */
 	delete: async (req, res, next) => {
+		const query = req.query
+		const id = parseInt(query.id)
 		await jwtAuthenticatedResponse(req, res, next, false, 
-				validPositiveInt(req.body.id)
+				validPositiveInt(id)
 				, async (err, user, info) => {
-					const cont = await Content.findByPk(req.body.id)
+					const cont = await Content.findByPk(id)
 					if (cont)
 					{
 						const pkg = await Package.findByPk(cont.package)
 						if (pkg.user == user.id)
 						{
-							await Donation.increment({quantity: cont.quantity}, 
-								{where: {id: cont.donation}})
+							// Increases quantity when a content is deleted
+							await Donation.update(
+								{
+									quantity: literal(`quantity + ${cont.quantity}`),
+									finished: false
+								}, {where: {id: cont.donation}, paranoid: false})
+
 							res.status(StatusCodes.OK)
 								.send(await cont.destroy())
 							if (!(await Content.count({where: {package: pkg.id}})))

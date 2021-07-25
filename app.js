@@ -3,7 +3,6 @@ require('dotenv').config()
 const db = require('./db/sequelize')
 
 const express = require('express')
-const createError = require('http-errors')
 const http = require('http')
 const cors = require('cors')
 

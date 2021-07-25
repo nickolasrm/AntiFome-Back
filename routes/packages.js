@@ -10,6 +10,7 @@ router.get('/packages/institution', packages.index_institution)
 router.get('/packages/content', contents.index_by_package)
 router.get('/packages/content/institution', contents.index_by_package_institution)
 router.post('/packages', packages.store)
+router.post('/packages/receive', packages.receive)
 router.delete('/packages', packages.delete)
 router.delete('/packages/content', contents.delete)
 

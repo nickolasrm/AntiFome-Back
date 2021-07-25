@@ -7,6 +7,7 @@ const Content = require('../models/content')
 const contents = require('./contents')
 const Donation = require('../models/donation')
 const sequelize = require('../db/sequelize')
+const {QueryTypes, literal} = require('sequelize')
 
 module.exports = {
 	/**
@@ -73,7 +74,7 @@ module.exports = {
 	},
 
 	/**
-	 * Returns all packages relative to the token if the token is a institution token
+	 * Returns all packages relative to the institution if the token is the institution token
 	 * @param {Request} req 
 	 * @param {Response} res 
 	 * @param {Middleware} next 
@@ -81,8 +82,41 @@ module.exports = {
 	index_institution: async (req, res, next) => {
 		await jwtAuthenticatedResponse(req, res, next, true, true, async (err, user, info) => {
 			res.status(StatusCodes.OK)
-				.json(await Package.findAll({where: {institution: user.id},
-					attributes: ['id', 'institution', 'finished']}))
+				.json(await Package.findAll({
+					where: {institution: user.id},
+					attributes: ['id', 'institution', 'finished']
+				}))
+		})
+	},
+
+	/**
+	 * Sets the package as finished if the token user is the institution of it
+	 * @param {Request} req 
+	 * @param {Response} res 
+	 * @param {Middleware} next 
+	 */
+	receive: async (req, res, next) => {
+		const body = req.body
+		const id = body.id
+		await jwtAuthenticatedResponse(req, res, next, true, 
+			validPositiveInt(id), async (err, user, info) => {
+			const pkg = await Package.findOne(id)
+			if (pkg)
+			{
+				if (pkg.institution = user.id)
+				{
+					pkg.finished = true
+					await pkg.save()
+					res.status(StatusCodes.OK)
+						.send(ReasonPhrases.OK)
+				}
+				else
+					res.status(StatusCodes.UNAUTHORIZED)
+						.send(ReasonPhrases.UNAUTHORIZED)
+			}
+			else
+				res.status(StatusCodes.NOT_FOUND)
+					.send(ReasonPhrases.NOT_FOUND)
 		})
 	},
 
@@ -93,31 +127,33 @@ module.exports = {
 	 * @param {Middleware} next 
 	 */
 	delete: async (req, res, next) => {
-		const body = req.body
+		const query = req.query
+		const id = query.id
 		await jwtAuthenticatedResponse(req, res, next, false, 
-				validPositiveInt(body.id), 
+				validPositiveInt(id), 
 				async (err, user, info) => {
-			const pkg = await Package.findByPk(body.id)
+			const pkg = await Package.findByPk(id)
 			if (pkg)
 			{
 				if (pkg.user == user.id && !pkg.finished)
 				{
-					const sum = await Content.findAll({
+					// Should be replaced by a UPDATE composite query
+					const conts = await Content.findAll({
 						where: {package: pkg.id},
-						attributes: [[sequelize.fn('sum', sequelize.col('quantity')), 'total'], 
-									'donation'],
-						group: ['donation']
+						attributes: ['quantity', 'donation'],
 					})
-					for(let group of sum)
-						await Donation.increment({quantity: parseInt(group.dataValues.total)}, 
-							{where: {id: group.dataValues.donation}})
+					for(let cont of conts)
+						await Donation.update({
+							quantity: literal(`quantity + ${parseInt(cont.quantity)}`),
+							finished: false
+						}, {where: {id: cont.donation}, paranoid: false})
 
 					if (await pkg.destroy())
 						res.status(StatusCodes.OK)
 							.send(ReasonPhrases.OK)
 					else
 						res.status(StatusCodes.INTERNAL_SERVER_ERROR)
-							.send(ReasonPhrases.INTERNAL_SERVER_ERROR)
+							.send(ReasonPhrases.INTERNAL_SERVER_ERROR) 
 				}
 				else
 					res.status(StatusCodes.UNAUTHORIZED)

@@ -2,6 +2,9 @@ const {Model, DataTypes} = require('sequelize')
 const Package = require('./package')
 const Donation = require('./donation')
 
+/**
+ * Contains all entries of a package table
+ */
 class Content extends Model
 {
 	static init(sequelize)
@@ -29,7 +32,7 @@ class Content extends Model
             },
             quantity: {
                 type: DataTypes.INTEGER,
-                allowNull: false               
+                allowNull: false,
             }
 		}, {
 			sequelize,
@@ -39,11 +42,6 @@ class Content extends Model
 		})
         return Content
 	}
-
-    static associate(models)
-    {
-        Content.belongsTo(models.Donation, {foreignKey: 'id', targetKey: 'donation'})
-    }
 }
 
 module.exports = Content

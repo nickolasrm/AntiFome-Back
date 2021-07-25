@@ -3,6 +3,7 @@ const passport = require('../config/passport')
 const {validText, validIntInRange, jwtAuthenticatedResponse, validPositiveInt} = require('./misc/util')
 const {StatusCodes, ReasonPhrases} = require('http-status-codes')
 const constants = require('../misc/constants')
+const Content = require('../models/content')
 
 module.exports = {
 	/**
@@ -61,7 +62,7 @@ module.exports = {
 		if (validPositiveInt(id))
 		{
 			const donations = await Donation.findAll(
-				{where: {user: id, donationFinished: false}})
+				{where: {user: id, finished: false}})
 			return res.status(StatusCodes.OK)
 				.json(donations)
 		}
@@ -77,14 +78,18 @@ module.exports = {
 	 * @param {Next} next 
 	 */
 	delete: async (req, res, next) => {
-		const body = req.body
-		await jwtAuthenticatedResponse(req, res, next, true, Number.isInteger(body.id), 
+		const query = req.query
+		const id = parseInt(query.id)
+		await jwtAuthenticatedResponse(req, res, next, true, Number.isInteger(id), 
 			async (err, user, info) => {
-				const don = await Donation.findOne({where: {id: body.id}})
+				const don = await Donation.findOne({where: {id},
+					paranoid: false})
+				// Checks if a donation belongs to the user
 				if (don)
 				{
 					if (don.user == user.id)
 					{
+						// No problems related to existent content because of paranoid
 						await don.destroy()
 						res.status(StatusCodes.OK)
 							.send(StatusCodes.OK)

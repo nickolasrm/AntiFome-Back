@@ -12,7 +12,7 @@ const STATE_SELECT_QUERY = 'SELECT id, username, state, city, neighborhood, \
 module.exports = {
 	/**
 	 * Returns all institutions by its state and city, if specified, 
-	 * that has at least one donation
+	 * that have at least one donation
 	 * @param {Request} req 
 	 * @param {Response} res 
 	 * @param {Middleware} next 
