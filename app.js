@@ -19,6 +19,7 @@ const accountRouter = require('./routes/account')
 const donationsRouter = require('./routes/donations')
 const packagesRouter = require('./routes/packages')
 const citiesRouter = require('./routes/cities')
+const institutionsRouter = require('./routes/institutions')
 
 const app = express()
 
@@ -44,6 +45,7 @@ app.use(accountRouter)
 app.use(donationsRouter)
 app.use(packagesRouter)
 app.use(citiesRouter)
+app.use(institutionsRouter)
 
 //Error handler
 errorHandler(app)

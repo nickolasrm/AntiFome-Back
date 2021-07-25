@@ -61,7 +61,7 @@ module.exports = {
             })
         //Adding index to improve performance
         await queryInterface.addIndex('users', ['email'])
-        await queryInterface.addIndex('users', ['state', 'city'])
+        await queryInterface.addIndex('users', ['state', 'city', 'isCnpj'])
     },
 
     down: async (queryInterface, Sequelize) => {

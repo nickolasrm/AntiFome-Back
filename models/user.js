@@ -67,7 +67,7 @@ class User extends Model
 				sequelize,
 				tableName: 'users',
 				timestamps: false,
-				indexes: [{fields: ['email']}, {fields: ['state', 'city']}]
+				indexes: [{fields: ['email']}, {fields: ['state', 'city', 'isCnpj']}]
 			})
 	}
 }
