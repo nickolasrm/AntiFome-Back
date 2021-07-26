@@ -47,7 +47,20 @@ function generateDonation(args)
 	}
 }
 
+function generatePackage(args)
+{
+	if (!args) args = {}
+	return {
+		institution: args.institution || 1, 
+		content: [
+			{id: args.cid1 || 1 , quantity: args.qid1 || 3},
+			{id: args.cid2 || 2, quantity: args.qid2 || 2}
+		]
+	}
+}
+
 module.exports = {
 	generateUser,
-	generateDonation
+	generateDonation,
+	generatePackage
 }

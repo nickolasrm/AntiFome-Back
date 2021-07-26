@@ -78,61 +78,6 @@ describe('Donations', () => {
 		})
 	})
 
-	describe('Retrieving', () => {
-		it('No headers', async () => {
-			const res = await request(app)
-				.get('/donations')
-				.send()
-			expect(res.status).toBe(StatusCodes.BAD_REQUEST)
-		})
-
-		it('With wrong token', async () => {
-			const res = await request(app)
-				.get('/donations')
-				.set('Authorization', 'Wrong token')
-				.send()
-			expect(res.status).toBe(StatusCodes.UNAUTHORIZED)
-		})
-
-		it('With wrong body', async () => {
-			const res = await request(app)
-				.get('/donations')
-				.set('Authorization', institutionToken)
-				.set('Content-Type', 'application/json')
-				.send({})
-			expect(res.status).toBe(StatusCodes.BAD_REQUEST)
-		})
-
-		it('With CPF', async () => {
-			const res = await request(app)
-				.get('/donations')
-				.set('Authorization', userToken)
-				.set('Content-Type', 'application/json')
-				.send(generateDonation())
-			expect(res.status).toBe(StatusCodes.UNAUTHORIZED)
-		})
-
-		it('Invalid donation id', async () => {
-			const res = await request(app)
-				.get('/donations')
-				.set('Authorization', institutionToken)
-				.set('Content-Type', 'application/json')
-				.send({id: 10})
-			expect(res.status).toBe(StatusCodes.NOT_FOUND)
-		})
-
-		it('Right retrieve', async () => {
-			const res = await request(app)
-				.get('/donations')
-				.set('Authorization', institutionToken)
-				.set('Content-Type', 'application/json')
-				.send({id: 1})
-			expect(res.status).toBe(StatusCodes.OK)
-			const don = generateDonation()
-			expect(res.body.description).toBe(don.description)
-		})
-	})
-
 	describe('Index', () => {
 		it('No headers', async () => {
 			const res = await request(app)
@@ -179,14 +124,16 @@ describe('Donations', () => {
 		it('Invalid user', async () => {
 			const res = await request(app)
 				.get('/donations/waiting_donator')
-				.send({user: 2}) // <- cpf person
+				.query({id: 2}) // <- cpf person
+				.send()
 			expect(res.status).toBe(StatusCodes.OK)
 		})
 
 		it('Right index', async () => {
 			const res = await request(app)
 				.get('/donations/waiting_donator')
-				.send({user: 1}) // <- institution
+				.query({id: 1})
+				.send() // <- institution
 			expect(res.status).toBe(StatusCodes.OK)
 			const don = generateDonation()
 			expect(res.body[0].description).toBe(don.description)
@@ -234,7 +181,7 @@ describe('Donations', () => {
 				.delete('/donations')
 				.set('Authorization', institutionToken)
 				.set('Content-Type', 'application/json')
-				.send({id: 10})
+				.query({id: 10})
 			expect(res.status).toBe(StatusCodes.NOT_FOUND)
 		})
 
@@ -243,7 +190,8 @@ describe('Donations', () => {
 				.delete('/donations')
 				.set('Authorization', institutionToken)
 				.set('Content-Type', 'application/json')
-				.send({id: 1})
+				.query({id: 1})
+				.send()
 			expect(res.status).toBe(StatusCodes.OK)
 		})
 	})

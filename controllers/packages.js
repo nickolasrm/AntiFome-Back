@@ -26,7 +26,7 @@ module.exports = {
 			if (institution && institution.isCnpj)
 			{
 				//Array with added contents
-				let addedContent = []
+				let added = 0
 
 				//Creates a pkg
 				const pkg = await Package.create({
@@ -40,12 +40,12 @@ module.exports = {
 					const content = await contents.store(institution_id, pkg.id, 
 						el.id, el.quantity)
 					if (content instanceof Content)
-						addedContent.push(content)
+						added += 1
 				}
 
-				if(addedContent.length)
+				if(added > 0)
 					return res.status(StatusCodes.CREATED)
-						.json({id: pkg.id, contents: addedContent})
+						.json(pkg.id)
 				else
 				{
 					await pkg.destroy()
@@ -100,7 +100,7 @@ module.exports = {
 		const id = body.id
 		await jwtAuthenticatedResponse(req, res, next, true, 
 			validPositiveInt(id), async (err, user, info) => {
-			const pkg = await Package.findOne(id)
+			const pkg = await Package.findOne({where: {id}})
 			if (pkg)
 			{
 				if (pkg.institution = user.id)
@@ -128,7 +128,7 @@ module.exports = {
 	 */
 	delete: async (req, res, next) => {
 		const query = req.query
-		const id = query.id
+		const id = parseInt(query.id)
 		await jwtAuthenticatedResponse(req, res, next, false, 
 				validPositiveInt(id), 
 				async (err, user, info) => {
